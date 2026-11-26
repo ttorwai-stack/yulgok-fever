@@ -254,11 +254,11 @@ const OWNER='대장 율곡타이거';
 const rl=r=>RL[r]?RI[r]+' '+RL[r]:r;
 const SL={'모두':'모두','편집 이상':RL['편집']+' 이상','관리자만':RL['관리자']+'만'};
 const sl=s=>SL[s]||s;
-/* 구글 앱스크립트 앱은 율곡피버 통행증을 붙여 열어 등급 그대로 들어가게 함 */
+/* 율곡피버에 등재된 자작 앱(앱스크립트·GitHub Pages)은 통행증을 붙여 열어 등급 그대로 들어가게 함 */
 async function openApp(ev,el){
   if(ev.ctrlKey||ev.metaKey||ev.shiftKey||ev.button)return true;
   const url=el.getAttribute('href');
-  if(!/^https:\/\/script\.google\.com\//.test(url))return true;
+  if(!/^https:\/\/(script\.google\.com|ttorwai-stack\.github\.io)\//.test(url))return true;
   ev.preventDefault();
   const w=window.open('about:blank','_blank');
   try{const p=await api('apiPass',el.dataset.app);const u=url+(url.includes('?')?'&':'?')+'yp='+p;if(w)w.location.href=u;else location.href=u}
