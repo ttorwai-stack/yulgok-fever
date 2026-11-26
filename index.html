@@ -247,6 +247,24 @@ function fail(e){toast(errMsg(e),true)}
 const S={me:null,data:null,tab:'home',cat:'전체',q:'',fcat:'전체',fq:'',bcat:'전체',bq:'',admTab:'apps'};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* 화면에 보이는 등급 이름(시트 값은 관리자/편집/열람 그대로) */
+const RL={'관리자':'율곡타이거','편집':'율곡재규어','열람':'율곡비버','대기':'율곡햄스터'};
+const RI={'관리자':'🐯','편집':'🐆','열람':'🦫','대기':'🐹'};
+const OWNER='대장 율곡타이거';
+const rl=r=>RL[r]?RI[r]+' '+RL[r]:r;
+const SL={'모두':'모두','편집 이상':RL['편집']+' 이상','관리자만':RL['관리자']+'만'};
+const sl=s=>SL[s]||s;
+/* 구글 앱스크립트 앱은 율곡피버 통행증을 붙여 열어 등급 그대로 들어가게 함 */
+async function openApp(ev,el){
+  if(ev.ctrlKey||ev.metaKey||ev.shiftKey||ev.button)return true;
+  const url=el.getAttribute('href');
+  if(!/^https:\/\/script\.google\.com\//.test(url))return true;
+  ev.preventDefault();
+  const w=window.open('about:blank','_blank');
+  try{const p=await api('apiPass',el.dataset.app);const u=url+(url.includes('?')?'&':'?')+'yp='+p;if(w)w.location.href=u;else location.href=u}
+  catch(e){if(w)w.location.href=url;else location.href=url}
+  return false;
+}
 const isEd=()=>S.me&&(S.me.role==='관리자'||S.me.role==='편집');
 const isAdm=()=>S.me&&S.me.role==='관리자';
 function icon(a,cls){
@@ -277,13 +295,13 @@ function start(){
 }
 function who(){
   const m=S.me;if(!m)return;
-  $('#who').innerHTML=`<span class="nm2">${esc(m.name||m.email)}</span>${m.role?`<span class="role">${esc(m.owner?'총괄 관리자':m.role)}</span>`:''}<a style="color:#aab4cc;cursor:pointer;margin-left:4px" onclick="logout()">로그아웃</a>`;
+  $('#who').innerHTML=`<span class="nm2">${esc(m.name||m.email)}</span>${m.role?`<span class="role">${esc(m.owner?RI['관리자']+' '+OWNER:rl(m.role))}</span>`:''}<a style="color:#aab4cc;cursor:pointer;margin-left:4px" onclick="logout()">로그아웃</a>`;
 }
 function gate(){
   who();
   const m=S.me;
   if(m.status==='대기'){
-    $('#app').innerHTML=`<div class="gate"><div class="seal">栗</div><h2>승인을 기다리고 있습니다</h2><p class="lead">${esc(m.email)} 계정으로 요청했습니다.<br>관리자가 승인하면 바로 쓸 수 있습니다.</p><button class="btn" onclick="location.reload()">새로고침</button></div>`;
+    $('#app').innerHTML=`<div class="gate"><div class="seal">栗</div><h2>${RI['대기']} ${RL['대기']}님, 승인을 기다리고 있습니다</h2><p class="lead">${esc(m.email)} 계정으로 요청했습니다.<br>관리자가 승인하면 바로 쓸 수 있습니다.</p><button class="btn" onclick="location.reload()">새로고침</button></div>`;
     return;
   }
   $('#app').innerHTML=`<div class="gate"><div class="seal">栗</div><h2>율곡피버</h2><p class="lead">율곡연수원 업무 도구함입니다.<br>${m.status==='거절'?'이전 요청이 거절되었습니다. 다시 요청할 수 있습니다.':'처음 오셨다면 사용 승인을 요청해 주세요.'}</p>
@@ -336,7 +354,7 @@ function drawGrid(){
     const off=!a.url||a.status==='준비중';
     const badge=a.status!=='운영'?`<span class="badge b-${esc(a.status)}">${esc(a.status)}</span>`:'';
     const inner=`${badge}${icon(a)}<div class="nm">${esc(a.name)}</div><div class="ds">${esc(a.desc)}</div>`;
-    return off?`<div class="tile off" title="${esc(a.desc)}">${inner}</div>`:`<a class="tile" href="${esc(a.url)}" target="_blank" rel="noopener" title="${esc(a.desc)}">${inner}</a>`;
+    return off?`<div class="tile off" title="${esc(a.desc)}">${inner}</div>`:`<a class="tile" href="${esc(a.url)}" target="_blank" rel="noopener" data-app="${a.id}" onclick="return openApp(event,this)" title="${esc(a.desc)}">${inner}</a>`;
   }).join('');
   if(isEd()&&!q)h+=`<div class="tile add" onclick="editApp()"><div class="ic">＋</div><div class="nm">앱 등재</div></div>`;
   $('#grid').innerHTML=h||'<div class="empty" style="grid-column:1/-1">찾는 도구가 없습니다</div>';
@@ -358,7 +376,7 @@ function editApp(id){
   <div class="g2"><div><label class="f">분류</label><input class="in" id="ea-cat" list="ea-cats" maxlength="20" value="${esc(a.cat)}" placeholder="과정 운영"><datalist id="ea-cats">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist></div>
   <div><label class="f">상태</label><select class="in" id="ea-status">${S.data.appStatus.map(s=>`<option ${s===a.status?'selected':''}>${s}</option>`).join('')}</select></div></div>
   <label class="f">설명</label><input class="in" id="ea-desc" maxlength="200" value="${esc(a.desc)}" oninput="EA.desc=this.value;prevApp()">
-  <label class="f">보이는 사람</label><select class="in" id="ea-scope">${S.data.appScope.map(s=>`<option ${s===a.scope?'selected':''}>${s}</option>`).join('')}</select>
+  <label class="f">보이는 사람</label><select class="in" id="ea-scope">${S.data.appScope.map(s=>`<option value="${s}" ${s===a.scope?'selected':''}>${sl(s)}</option>`).join('')}</select>
   <label class="f">아이콘</label><div class="emojis" id="ea-emo">${EMO.map(e=>`<button type="button" onclick="EA.icon='${e}';$('#ea-icon').value='';prevApp()">${e}</button>`).join('')}</div>
   <input class="in" id="ea-icon" style="margin-top:8px" placeholder="다른 이모지 하나 또는 이미지 주소(https://)" value="${EMO.includes(a.icon)?'':esc(a.icon)}" oninput="if(this.value.trim())EA.icon=this.value.trim();prevApp()">
   <label class="f">바탕색</label><div class="colors" id="ea-col">${COL.map(c=>`<button type="button" style="background:${c}" data-c="${c}" onclick="EA.color='${c}';prevApp()"></button>`).join('')}</div>
@@ -508,7 +526,7 @@ function vAdmin(){
   const tabs=[['apps','앱 관리']];
   if(isAdm())tabs.push(['users','사용자·권한'+(S.data.pending?` (${S.data.pending})`:'')],['log','활동 기록']);
   if(!tabs.find(t=>t[0]===S.admTab))S.admTab='apps';
-  $('#app').innerHTML=`<div class="hero"><div><h2>관리</h2><p class="lead" style="margin:0">${isAdm()?'총괄 관리자 화면입니다.':'앱 등재·순서를 관리합니다.'}</p></div>
+  $('#app').innerHTML=`<div class="hero"><div><h2>관리</h2><p class="lead" style="margin:0">${isAdm()?OWNER+' 화면입니다.':'앱 등재·순서를 관리합니다.'}</p></div>
   <span class="sp"></span>${isAdm()?`<a class="btn" href="${esc(S.data.sheetUrl)}" target="_blank">데이터 시트</a><a class="btn" href="${esc(S.data.folderUrl)}" target="_blank">자료 폴더</a>`:''}</div>
   <div class="subtabs">${tabs.map(t=>`<button class="${t[0]===S.admTab?'on':''}" onclick="S.admTab='${t[0]}';vAdmin()">${t[1]}</button>`).join('')}</div><div id="adm"></div>`;
   ({apps:aApps,users:aUsers,log:aLog})[S.admTab]();
@@ -517,7 +535,7 @@ function aApps(){
   const apps=S.data.apps;
   $('#adm').innerHTML=`<div class="row" style="margin-bottom:12px"><span class="hint" style="margin:0">≡ 손잡이를 끌어 순서를 바꾸면 도구함에 그대로 반영됩니다.</span><span class="sp"></span><button class="btn pri" onclick="editApp()">＋ 앱 등재</button></div>
   <div class="box tbl-wrap"><table class="t"><thead><tr><th></th><th></th><th>이름</th><th class="hide-m">분류</th><th>상태</th><th class="hide-m">보이는 사람</th><th class="hide-m">주소</th><th></th></tr></thead><tbody id="atb">
-  ${apps.map(a=>`<tr draggable="true" data-id="${a.id}"><td class="hd">≡</td><td>${icon(a,'ic-s')}</td><td><b>${esc(a.name)}</b><div class="hint" style="margin:0">${esc(a.desc)}</div></td><td class="hide-m">${esc(a.cat)}</td><td>${esc(a.status)}</td><td class="hide-m">${esc(a.scope)}</td>
+  ${apps.map(a=>`<tr draggable="true" data-id="${a.id}"><td class="hd">≡</td><td>${icon(a,'ic-s')}</td><td><b>${esc(a.name)}</b><div class="hint" style="margin:0">${esc(a.desc)}</div></td><td class="hide-m">${esc(a.cat)}</td><td>${esc(a.status)}</td><td class="hide-m">${esc(sl(a.scope))}</td>
   <td class="hide-m" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.url?`<a href="${esc(a.url)}" target="_blank">${esc(a.url.replace(/^https:\/\//,''))}</a>`:'<span class="hint">없음</span>'}</td>
   <td><button class="btn sm" onclick="editApp('${a.id}')">고치기</button></td></tr>`).join('')}</tbody></table>${apps.length?'':'<div class="empty">등재된 앱이 없습니다</div>'}</div>`;
   dragRows();
@@ -537,12 +555,12 @@ async function aUsers(){
 function drawUsers(us){
   us.sort((a,b)=>(a.status==='대기'?0:1)-(b.status==='대기'?0:1)||b.req.localeCompare(a.req));
   S.data.pending=us.filter(u=>u.status==='대기').length;
-  $('#adm').innerHTML=`<p class="hint" style="margin:0 0 12px">관리자 = 사용자 승인·권한까지 전부 · 편집 = 앱 등재·자료 올리기·공지 · 열람 = 보기와 게시판 글·댓글</p>
+  $('#adm').innerHTML=`<p class="hint" style="margin:0 0 12px">${rl('관리자')} = 사용자 승인·권한까지 전부 · ${rl('편집')} = 앱 등재·자료 올리기·공지 · ${rl('열람')} = 보기와 게시판 글·댓글 · ${rl('대기')} = 승인 대기</p>
   <div class="box tbl-wrap"><table class="t"><thead><tr><th>이름</th><th>계정</th><th class="hide-m">소속·메모</th><th>권한</th><th>상태</th><th class="hide-m">요청</th><th></th></tr></thead><tbody>
-  ${us.map(u=>u.owner?`<tr><td><b>${esc(u.name)}</b></td><td>${esc(u.email)}</td><td class="hide-m">${esc(u.memo)}</td><td>총괄 관리자</td><td><span class="st 승인">승인</span></td><td class="hide-m"></td><td></td></tr>`:
+  ${us.map(u=>u.owner?`<tr><td><b>${esc(u.name)}</b></td><td>${esc(u.email)}</td><td class="hide-m">${esc(u.memo)}</td><td>${OWNER}</td><td><span class="st 승인">승인</span></td><td class="hide-m"></td><td></td></tr>`:
   `<tr data-e="${esc(u.email)}"><td><b>${esc(u.name)}</b></td><td style="word-break:break-all">${esc(u.email)}</td><td class="hide-m">${esc(u.memo)}</td>
-  <td><select class="in" style="padding:5px 8px;width:auto" data-k="role">${['관리자','편집','열람'].map(r=>`<option ${r===u.role?'selected':''}>${r}</option>`).join('')}</select></td>
-  <td><select class="in" style="padding:5px 8px;width:auto" data-k="status">${['대기','승인','거절'].map(r=>`<option ${r===u.status?'selected':''}>${r}</option>`).join('')}</select></td>
+  <td><select class="in" style="padding:5px 8px;width:auto" data-k="role">${['관리자','편집','열람'].map(r=>`<option value="${r}" ${r===u.role?'selected':''}>${rl(r)}</option>`).join('')}</select></td>
+  <td><select class="in" style="padding:5px 8px;width:auto" data-k="status">${['대기','승인','거절'].map(r=>`<option value="${r}" ${r===u.status?'selected':''}>${r==='대기'?'대기('+RL['대기']+')':r}</option>`).join('')}</select></td>
   <td class="hide-m hint" style="white-space:nowrap">${esc(u.req)}</td>
   <td style="white-space:nowrap">${u.status==='대기'?`<button class="btn sm pri" onclick="setU(this,'승인')">승인</button> `:''}<button class="btn sm" onclick="setU(this)">저장</button> <button class="btn sm bad" onclick="delU(this)">삭제</button></td></tr>`).join('')}
   </tbody></table></div>`;
