@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>율곡피버</title>
+<meta name="description" content="율곡연수원 업무 도구함">
+<link rel="icon" href="https://fonts.gstatic.com/s/e/notoemoji/latest/1f3ef/72.png">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --bg:#f5f6f9; --card:#fff; --ink:#1b2333; --sub:#5d6678; --mute:#8b93a3; --line:#e4e7ee;
+  --pri:#2f5bd3; --pri-soft:#e9effc; --ok:#1f9d6b; --warn:#c98a12; --bad:#c94a44;
+  --ink-hero:#14213d; --gold:#c9a45c; --r:14px; --sh:0 1px 2px rgba(20,30,60,.05),0 4px 16px rgba(20,30,60,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Pretendard Variable",Pretendard,-apple-system,"Malgun Gothic",sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--pri);text-decoration:none}
+.hidden{display:none!important}
+
+/* 상단 */
+.top{background:var(--ink-hero);color:#fff;position:sticky;top:0;z-index:20}
+.top .wrap{max-width:1120px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:18px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:-.02em;cursor:pointer;white-space:nowrap}
+.brand .seal{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--gold),#a8823d);display:grid;place-items:center;font-size:16px;color:#14213d;font-weight:900}
+.brand small{font-weight:500;font-size:12px;color:#aab4cc;letter-spacing:0}
+nav.tabs{display:flex;gap:4px;margin-left:12px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{background:none;border:0;color:#c8d0e2;padding:8px 14px;border-radius:9px;cursor:pointer;font-weight:600;white-space:nowrap;position:relative}
+nav.tabs button:hover{color:#fff;background:rgba(255,255,255,.07)}
+nav.tabs button.on{color:#fff;background:rgba(255,255,255,.13)}
+nav.tabs .dot{position:absolute;top:5px;right:5px;min-width:16px;height:16px;border-radius:8px;background:var(--bad);font-size:10px;line-height:16px;color:#fff;padding:0 4px}
+.who{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;color:#c8d0e2;white-space:nowrap}
+.role{font-size:11px;padding:2px 8px;border-radius:20px;background:rgba(201,164,92,.22);color:#f1d9a6;font-weight:700}
+
+main{max-width:1120px;margin:0 auto;padding:28px 20px 60px}
+h2{font-size:22px;margin:0 0 4px;letter-spacing:-.02em}
+.lead{color:var(--sub);margin:0 0 22px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+
+/* 도구함 */
+.hero{display:flex;align-items:flex-end;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.hero h1{font-size:26px;margin:0;letter-spacing:-.03em}
+.hero p{margin:4px 0 0;color:var(--sub)}
+.search{position:relative;min-width:240px;flex:0 1 320px;margin-left:auto}
+.search input{width:100%;padding:10px 14px 10px 36px;border:1px solid var(--line);border-radius:11px;background:#fff;outline:none}
+.search input:focus{border-color:var(--pri);box-shadow:0 0 0 3px var(--pri-soft)}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--mute)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 18px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:5px 13px;font-size:13px;cursor:pointer;color:var(--sub);font-weight:600}
+.chip.on{background:var(--ink-hero);border-color:var(--ink-hero);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:14px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 10px 16px;text-align:center;cursor:pointer;transition:.15s;position:relative;box-shadow:var(--sh);display:flex;flex-direction:column;align-items:center;color:var(--ink)}
+.tile:hover{transform:translateY(-2px);border-color:#cfd6e6;box-shadow:0 6px 22px rgba(20,30,60,.1)}
+.tile .ic{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;font-size:32px;margin-bottom:12px;overflow:hidden}
+.tile .ic img{width:100%;height:100%;object-fit:cover}
+.tile .nm{font-weight:700;font-size:14px;line-height:1.3;word-break:keep-all}
+.tile .ds{font-size:12px;color:var(--mute);margin-top:4px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:keep-all}
+.tile.off{cursor:default;opacity:.62}
+.tile.off:hover{transform:none;box-shadow:var(--sh);border-color:var(--line)}
+.badge{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:20px;position:absolute;top:9px;right:9px}
+.b-준비중{background:#eef0f4;color:#6a7385}.b-시험{background:#fff3dc;color:#a76f05}.b-보관{background:#f3e5e4;color:#a5403b}
+.tile.add{border:1.5px dashed #c5cde0;background:transparent;box-shadow:none;color:var(--mute);justify-content:center}
+.tile.add .ic{background:#eef1f7;color:#8a94aa;font-size:28px}
+.section-h{display:flex;align-items:center;margin:34px 0 12px}
+.section-h h3{margin:0;font-size:16px}
+.section-h a{margin-left:auto;font-size:13px;cursor:pointer}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+.mini li{display:flex;gap:10px;padding:11px 16px;border-top:1px solid var(--line);cursor:pointer;align-items:center}
+.mini li:first-child{border-top:0}
+.mini li:hover{background:#fafbfd}
+.mini .t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .d{font-size:12px;color:var(--mute);white-space:nowrap}
+ul{list-style:none;margin:0;padding:0}
+.empty{padding:28px;text-align:center;color:var(--mute);font-size:14px}
+
+/* 표 목록 */
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:6px;background:#eef1f7;color:#4d576b;white-space:nowrap}
+.tag.공지{background:#fde8e6;color:#b23b35}.tag.업무{background:var(--pri-soft);color:var(--pri)}.tag.건의{background:#e6f5ee;color:#18805a}
+.list li{display:flex;align-items:center;gap:12px;padding:14px 18px;border-top:1px solid var(--line)}
+.list li:first-child{border-top:0}
+.list li.click{cursor:pointer}
+.list li.click:hover{background:#fafbfd}
+.list .main{flex:1;min-width:0}
+.list .tt{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list .meta{font-size:12.5px;color:var(--mute);margin-top:2px}
+.list .pin{color:var(--bad);font-size:12px;font-weight:800}
+.ficon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:11px;font-weight:800;flex:none;color:#fff}
+
+/* 버튼·폼 */
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 14px;cursor:pointer;font-weight:600;font-size:14px;white-space:nowrap}
+.btn:hover{background:#f6f7fa}
+.btn.pri{background:var(--pri);border-color:var(--pri);color:#fff}
+.btn.pri:hover{background:#244bb8}
+.btn.bad{color:var(--bad)}
+.btn.sm{padding:5px 10px;font-size:13px;border-radius:8px}
+.btn:disabled{opacity:.5;cursor:default}
+label.f{display:block;font-size:13px;font-weight:700;color:var(--sub);margin:14px 0 6px}
+.in,select.in,textarea.in{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;outline:none}
+.in:focus{border-color:var(--pri);box-shadow:0 0 0 3px var(--pri-soft)}
+textarea.in{min-height:200px;resize:vertical;line-height:1.6}
+.hint{font-size:12px;color:var(--mute);margin-top:4px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+
+/* 모달 */
+.modal{position:fixed;inset:0;background:rgba(12,18,32,.45);display:flex;align-items:flex-start;justify-content:center;z-index:50;padding:40px 16px;overflow-y:auto}
+.sheet{background:#fff;border-radius:16px;width:100%;max-width:560px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.sheet.wide{max-width:760px}
+.sheet h3{margin:0 0 4px;font-size:18px}
+.sheet .foot{display:flex;gap:8px;margin-top:22px;align-items:center}
+.emojis{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.emojis button{width:36px;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer;font-size:18px}
+.emojis button.on{border-color:var(--pri);background:var(--pri-soft)}
+.colors{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.colors button{width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer}
+.colors button.on{box-shadow:0 0 0 2px var(--ink)}
+.prev{display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg);border-radius:12px;margin-top:16px}
+.prev .ic{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-size:28px;overflow:hidden}
+.prev .ic img{width:100%;height:100%;object-fit:cover}
+
+/* 글 보기 */
+.post-h{border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:16px}
+.post-h h3{font-size:20px;margin:8px 0 6px}
+.post-b{white-space:pre-wrap;word-break:break-word;line-height:1.75;min-height:80px}
+.cmts{margin-top:24px;border-top:1px solid var(--line);padding-top:14px}
+.cmt{padding:10px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.cmt .who2{font-weight:700;font-size:13px}
+.cmt .when{font-size:12px;color:var(--mute);margin-left:6px}
+.cmt p{margin:3px 0 0;white-space:pre-wrap}
+
+/* 관리 */
+.subtabs{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+.subtabs button{background:none;border:0;padding:10px 14px;cursor:pointer;font-weight:700;color:var(--mute);border-bottom:2px solid transparent;margin-bottom:-1px}
+.subtabs button.on{color:var(--ink);border-color:var(--ink)}
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th{text-align:left;font-size:12.5px;color:var(--mute);font-weight:700;padding:10px 12px;border-bottom:1px solid var(--line);background:#fafbfd;white-space:nowrap}
+table.t td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.t tr:last-child td{border-bottom:0}
+table.t tr.drag{opacity:.4}
+table.t .hd{cursor:grab;color:var(--mute);user-select:none;font-size:18px;width:28px}
+.ic-s{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:18px;overflow:hidden}
+.ic-s img{width:100%;height:100%;object-fit:cover}
+.tbl-wrap{overflow-x:auto}
+.st{font-size:12px;font-weight:700}
+.st.대기{color:var(--warn)}.st.승인{color:var(--ok)}.st.거절{color:var(--bad)}
+
+/* 안내 화면 */
+.gate{max-width:440px;margin:60px auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:32px;box-shadow:var(--sh);text-align:center}
+.gate .seal{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--gold),#a8823d);display:grid;place-items:center;font-size:26px;margin:0 auto 14px;color:#14213d;font-weight:900}
+.gate h2{margin-bottom:6px}
+.gate form{text-align:left;margin-top:10px}
+.spin{width:28px;height:28px;border:3px solid #dde2ee;border-top-color:var(--pri);border-radius:50%;animation:sp 1s linear infinite;margin:80px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1b2333;color:#fff;padding:11px 18px;border-radius:12px;font-size:14px;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:90vw}
+.toast.err{background:var(--bad)}
+.busy{position:fixed;top:0;left:0;height:3px;background:var(--gold);z-index:100;animation:bz 1.2s ease-in-out infinite}
+@keyframes bz{0%{width:0;left:0}50%{width:60%;left:20%}100%{width:0;left:100%}}
+footer{text-align:center;color:var(--mute);font-size:12px;padding:20px}
+
+@media (max-width:720px){
+  .top .wrap{padding:0 12px;gap:8px;height:auto;flex-wrap:wrap;padding-top:10px}
+  .brand small{display:none}
+  nav.tabs{order:3;width:100%;margin:0 -4px;padding-bottom:6px}
+  .who .nm2{display:none}
+  main{padding:20px 14px 50px}
+  .two,.g2{grid-template-columns:1fr}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}
+  .tile{padding:16px 6px 12px;border-radius:16px}
+  .tile .ic{width:54px;height:54px;font-size:27px;border-radius:15px}
+  .tile .ds{display:none}
+  .search{flex:1 1 100%;margin-left:0}
+  .list li{padding:12px 14px}
+  .hide-m{display:none}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand" onclick="go('home')"><span class="seal">栗</span>율곡피버 <small>율곡연수원 업무 도구함</small></div>
+    <nav class="tabs hidden" id="tabs">
+      <button data-t="home" onclick="go('home')">도구함</button>
+      <button data-t="files" onclick="go('files')">양식 자료실</button>
+      <button data-t="board" onclick="go('board')">게시판</button>
+      <button data-t="admin" onclick="go('admin')" class="hidden" id="tab-admin">관리</button>
+    </nav>
+    <div class="who" id="who"></div>
+  </div>
+</header>
+<main id="app"><div class="spin"></div></main>
+<footer>율곡피버 · 율곡연수원</footer>
+<div id="modal-root"></div>
+
+<script>
+/* ---------- 서버 호출 ---------- */
+let busyN = 0;
+function busy(d){busyN+=d;let b=document.getElementById('busy');if(busyN>0&&!b){b=document.createElement('div');b.id='busy';b.className='busy';document.body.appendChild(b)}if(busyN<=0&&b)b.remove()}
+const BACKEND='https://script.google.com/macros/s/AKfycbzQDRGtWNYkox_yIWs0bvAOpP6QzVYiySbfEe7phqas-_1In6WU3Y_x7sqgOo7KWkQj/exec';
+const CLIENT_ID='548414211209-vln8b0fn9enjkfcsjkka88u4clj1lji6.apps.googleusercontent.com';
+let TOK=null;
+try{TOK=sessionStorage.getItem('yf_tok')}catch(e){}
+function tokLeft(){try{return JSON.parse(atob(TOK.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))).exp*1000-Date.now()}catch(e){return -1}}
+let waitTok=null;
+function needLogin(){
+  // 토큰이 없거나 곧 만료되면 구글 로그인을 다시 받습니다.
+  if(TOK&&tokLeft()>60000)return Promise.resolve(TOK);
+  if(!waitTok)waitTok=new Promise(res=>{loginScreen(res)}).finally(()=>{waitTok=null});
+  return waitTok;
+}
+function gsiReady(){return new Promise(r=>{(function t(){window.google&&google.accounts&&google.accounts.id?r():setTimeout(t,100)})()})}
+async function loginScreen(done){
+  await gsiReady();
+  google.accounts.id.initialize({client_id:CLIENT_ID,auto_select:true,cancel_on_tap_outside:false,
+    callback:r=>{TOK=r.credential;try{sessionStorage.setItem('yf_tok',TOK)}catch(e){}closeM();const lg=$('#login');if(lg)lg.remove();done(TOK)}});
+  if(!$('#login')){
+    const d=document.createElement('div');d.id='login';d.className='modal';
+    d.innerHTML=`<div class="gate" style="margin:40px auto"><div class="seal">栗</div><h2>율곡피버</h2><p class="lead">율곡연수원 업무 도구함입니다.<br>구글 계정으로 로그인해 주세요.</p><div id="gbtn" style="display:flex;justify-content:center;min-height:44px"></div></div>`;
+    document.body.appendChild(d);
+  }
+  google.accounts.id.renderButton($('#gbtn'),{theme:'outline',size:'large',text:'signin_with',shape:'pill',locale:'ko'});
+  google.accounts.id.prompt();
+}
+function logout(){try{sessionStorage.removeItem('yf_tok')}catch(e){};TOK=null;try{google.accounts.id.disableAutoSelect()}catch(e){};location.reload()}
+async function api(fn,...args){
+  busy(1);
+  try{
+    const tok=await needLogin();
+    const r=await fetch(BACKEND,{method:'POST',body:JSON.stringify({tok,fn,args})});
+    const o=JSON.parse(await r.text());
+    if(!o.ok){
+      if(/로그인/.test(o.err)){TOK=null;try{sessionStorage.removeItem('yf_tok')}catch(e){}}
+      throw new Error(o.err);
+    }
+    return o.data;
+  }finally{busy(-1)}
+}
+function errMsg(e){return String(e&&e.message||e).replace(/^Error:\s*/,'').replace(/^Exception:\s*/,'')}
+function toast(m,err){const t=document.createElement('div');t.className='toast'+(err?' err':'');t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),err?4200:2200)}
+function fail(e){toast(errMsg(e),true)}
+
+/* ---------- 상태 ---------- */
+const S={me:null,data:null,tab:'home',cat:'전체',q:'',fcat:'전체',fq:'',bcat:'전체',bq:'',admTab:'apps'};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const isEd=()=>S.me&&(S.me.role==='관리자'||S.me.role==='편집');
+const isAdm=()=>S.me&&S.me.role==='관리자';
+function icon(a,cls){
+  const v=a.icon||'🧩';
+  const inner=/^https:\/\//.test(v)?`<img src="${esc(v)}" alt="">`:esc(v);
+  return `<div class="${cls||'ic'}" style="background:${esc(tint(a.color||'#3B6FD8'))}">${inner}</div>`;
+}
+function tint(hex){const n=parseInt(hex.slice(1),16),r=n>>16,g=n>>8&255,b=n&255;const m=x=>Math.round(x+(255-x)*.84);return `rgb(${m(r)},${m(g)},${m(b)})`}
+function day(s){if(!s)return'';const t=new Date(),d=s.slice(0,10),td=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');return d===td?s.slice(11,16):s.slice(2,10).replace(/-/g,'.')}
+function size(n){if(!n)return'';if(n<1024)return n+'B';if(n<1048576)return Math.round(n/1024)+'KB';return (n/1048576).toFixed(1)+'MB'}
+function fext(f){if(f.kind==='링크')return['링크','#6b7a99'];const e=(f.fname.split('.').pop()||'').toLowerCase();const m={hwp:['HWP','#2e7bd6'],hwpx:['HWP','#2e7bd6'],xlsx:['XLS','#1f8a4c'],xls:['XLS','#1f8a4c'],csv:['CSV','#1f8a4c'],docx:['DOC','#2b579a'],doc:['DOC','#2b579a'],pptx:['PPT','#c75a2a'],ppt:['PPT','#c75a2a'],pdf:['PDF','#c43b3b'],zip:['ZIP','#7a6a4f'],png:['IMG','#8a5bd6'],jpg:['IMG','#8a5bd6']};return m[e]||[(e||'FILE').slice(0,4).toUpperCase(),'#6b7a99']}
+
+/* ---------- 시작 ---------- */
+async function boot(){
+  try{
+    S.me=await api('whoami');
+    if(S.me.status!=='승인')return gate();
+    await reload();
+    start();
+  }catch(e){$('#app').innerHTML=`<div class="gate"><div class="seal">栗</div><h2>접속하지 못했습니다</h2><p class="lead">${esc(errMsg(e))}</p><button class="btn pri" onclick="location.reload()">다시 시도</button></div>`}
+}
+async function reload(){S.data=await api('apiGetAll');S.me=S.data.me}
+function start(){
+  $('#tabs').classList.remove('hidden');
+  $('#tab-admin').classList.toggle('hidden',!isEd());
+  const h=(location.hash||'').slice(1);
+  render(['home','files','board','admin'].includes(h)?h:'home');
+}
+function who(){
+  const m=S.me;if(!m)return;
+  $('#who').innerHTML=`<span class="nm2">${esc(m.name||m.email)}</span>${m.role?`<span class="role">${esc(m.owner?'총괄 관리자':m.role)}</span>`:''}<a style="color:#aab4cc;cursor:pointer;margin-left:4px" onclick="logout()">로그아웃</a>`;
+}
+function gate(){
+  who();
+  const m=S.me;
+  if(m.status==='대기'){
+    $('#app').innerHTML=`<div class="gate"><div class="seal">栗</div><h2>승인을 기다리고 있습니다</h2><p class="lead">${esc(m.email)} 계정으로 요청했습니다.<br>관리자가 승인하면 바로 쓸 수 있습니다.</p><button class="btn" onclick="location.reload()">새로고침</button></div>`;
+    return;
+  }
+  $('#app').innerHTML=`<div class="gate"><div class="seal">栗</div><h2>율곡피버</h2><p class="lead">율곡연수원 업무 도구함입니다.<br>${m.status==='거절'?'이전 요청이 거절되었습니다. 다시 요청할 수 있습니다.':'처음 오셨다면 사용 승인을 요청해 주세요.'}</p>
+  <form onsubmit="reqAccess(event)"><label class="f">이름</label><input class="in" id="rq-name" required maxlength="30" placeholder="홍길동">
+  <label class="f">소속·메모</label><input class="in" id="rq-memo" maxlength="100" placeholder="연수운영부 연수3팀">
+  <p class="hint">로그인 계정: ${esc(m.email)}</p>
+  <button class="btn pri" style="width:100%;margin-top:14px">승인 요청</button></form></div>`;
+}
+async function reqAccess(e){
+  e.preventDefault();
+  try{S.me=await api('requestAccess',$('#rq-name').value,$('#rq-memo').value);gate()}catch(x){fail(x)}
+}
+
+/* ---------- 화면 전환 ---------- */
+function go(t){if(!S.data)return;render(t)}
+function render(t){
+  if(t)S.tab=t;
+  if(S.tab==='admin'&&!isEd())S.tab='home';
+  history.replaceState(null,'','#'+S.tab);
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===S.tab));
+  const pd=S.data.pending||0;const ta=$('#tab-admin');ta.innerHTML='관리'+(isAdm()&&pd?`<span class="dot">${pd}</span>`:'');
+  who();
+  ({home:vHome,files:vFiles,board:vBoard,admin:vAdmin})[S.tab]();
+  window.scrollTo(0,0);
+}
+
+/* ---------- 도구함 ---------- */
+function vHome(){
+  const D=S.data,apps=D.apps.filter(a=>a.status!=='보관');
+  const cats=['전체',...new Set(apps.map(a=>a.cat||'기타'))];
+  if(!cats.includes(S.cat))S.cat='전체';
+  const hour=new Date().getHours(),hi=hour<11?'좋은 아침입니다':hour<18?'오늘도 힘내세요':'수고 많으셨습니다';
+  $('#app').innerHTML=`
+  <div class="hero"><div><h1>${esc(S.me.name||'')}님, ${hi}</h1><p>필요한 도구를 눌러 바로 여세요.</p></div>
+    <div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" placeholder="도구 찾기" value="${esc(S.q)}" oninput="S.q=this.value;drawGrid()"></div></div>
+  <div class="chips">${cats.map(c=>`<button class="chip ${c===S.cat?'on':''}" data-c="${esc(c)}" onclick="S.cat=this.dataset.c;vHome()">${esc(c)}</button>`).join('')}</div>
+  <div class="grid" id="grid"></div>
+  <div class="two" style="margin-top:34px">
+    <div><div class="section-h" style="margin-top:0"><h3>게시판</h3><a onclick="go('board')">전체 보기</a></div>
+      <div class="box"><ul class="mini">${D.posts.slice(0,5).map(p=>`<li onclick="openPost('${p.id}')"><span class="tag ${esc(p.cat)}">${esc(p.cat)}</span><span class="t">${esc(p.title)}</span><span class="d">${day(p.at)}</span></li>`).join('')||'<div class="empty">글이 없습니다</div>'}</ul></div></div>
+    <div><div class="section-h" style="margin-top:0"><h3>새 양식</h3><a onclick="go('files')">전체 보기</a></div>
+      <div class="box"><ul class="mini">${D.files.slice(0,5).map(f=>`<li onclick="getFile('${f.id}')"><span class="tag">${esc(f.cat)}</span><span class="t">${esc(f.title)}</span><span class="d">${day(f.at)}</span></li>`).join('')||'<div class="empty">아직 올린 양식이 없습니다</div>'}</ul></div></div>
+  </div>`;
+  drawGrid();
+}
+function drawGrid(){
+  const q=S.q.trim().toLowerCase();
+  const apps=S.data.apps.filter(a=>a.status!=='보관'&&(S.cat==='전체'||(a.cat||'기타')===S.cat)&&(!q||(a.name+' '+a.desc+' '+a.cat).toLowerCase().includes(q)));
+  let h=apps.map(a=>{
+    const off=!a.url||a.status==='준비중';
+    const badge=a.status!=='운영'?`<span class="badge b-${esc(a.status)}">${esc(a.status)}</span>`:'';
+    const inner=`${badge}${icon(a)}<div class="nm">${esc(a.name)}</div><div class="ds">${esc(a.desc)}</div>`;
+    return off?`<div class="tile off" title="${esc(a.desc)}">${inner}</div>`:`<a class="tile" href="${esc(a.url)}" target="_blank" rel="noopener" title="${esc(a.desc)}">${inner}</a>`;
+  }).join('');
+  if(isEd()&&!q)h+=`<div class="tile add" onclick="editApp()"><div class="ic">＋</div><div class="nm">앱 등재</div></div>`;
+  $('#grid').innerHTML=h||'<div class="empty" style="grid-column:1/-1">찾는 도구가 없습니다</div>';
+}
+
+/* ---------- 앱 등재 창 ---------- */
+const EMO=['🗓️','📝','💰','🎤','📷','⏱️','📊','📋','📚','🎓','🧭','🏫','👥','📣','🗂️','✅','🧾','💡','🤝','🏆','📈','🖨️','🔖','🧩'];
+const COL=['#3B6FD8','#2F9E77','#D98A1F','#8E5BD6','#1F8FB3','#C2504B','#5C6B87','#B5487F','#6E8B2F','#14213D'];
+function modal(html,wide){$('#modal-root').innerHTML=`<div class="modal" onmousedown="if(event.target===this)closeM()"><div class="sheet ${wide?'wide':''}">${html}</div></div>`}
+function closeM(){$('#modal-root').innerHTML=''}
+let EA=null;
+function editApp(id){
+  const a=id?S.data.apps.find(x=>x.id===id):{name:'',icon:'🧩',color:'#3B6FD8',url:'',cat:'',desc:'',status:'운영',scope:'모두'};
+  EA=Object.assign({},a);
+  const cats=[...new Set(S.data.apps.map(x=>x.cat).filter(Boolean))];
+  modal(`<h3>${id?'앱 고치기':'앱 등재'}</h3><p class="lead" style="margin:0">도구함에 아이콘으로 놓일 웹앱입니다.</p>
+  <label class="f">이름</label><input class="in" id="ea-name" maxlength="40" value="${esc(a.name)}" oninput="EA.name=this.value;prevApp()">
+  <label class="f">주소 (https://)</label><input class="in" id="ea-url" value="${esc(a.url)}" placeholder="https://script.google.com/macros/s/.../exec">
+  <div class="g2"><div><label class="f">분류</label><input class="in" id="ea-cat" list="ea-cats" maxlength="20" value="${esc(a.cat)}" placeholder="과정 운영"><datalist id="ea-cats">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist></div>
+  <div><label class="f">상태</label><select class="in" id="ea-status">${S.data.appStatus.map(s=>`<option ${s===a.status?'selected':''}>${s}</option>`).join('')}</select></div></div>
+  <label class="f">설명</label><input class="in" id="ea-desc" maxlength="200" value="${esc(a.desc)}" oninput="EA.desc=this.value;prevApp()">
+  <label class="f">보이는 사람</label><select class="in" id="ea-scope">${S.data.appScope.map(s=>`<option ${s===a.scope?'selected':''}>${s}</option>`).join('')}</select>
+  <label class="f">아이콘</label><div class="emojis" id="ea-emo">${EMO.map(e=>`<button type="button" onclick="EA.icon='${e}';$('#ea-icon').value='';prevApp()">${e}</button>`).join('')}</div>
+  <input class="in" id="ea-icon" style="margin-top:8px" placeholder="다른 이모지 하나 또는 이미지 주소(https://)" value="${EMO.includes(a.icon)?'':esc(a.icon)}" oninput="if(this.value.trim())EA.icon=this.value.trim();prevApp()">
+  <label class="f">바탕색</label><div class="colors" id="ea-col">${COL.map(c=>`<button type="button" style="background:${c}" data-c="${c}" onclick="EA.color='${c}';prevApp()"></button>`).join('')}</div>
+  <div class="prev" id="ea-prev"></div>
+  <div class="foot">${id?`<button class="btn bad" onclick="delApp('${id}')">삭제</button>`:''}<span class="sp"></span><button class="btn" onclick="closeM()">취소</button><button class="btn pri" onclick="saveApp()">저장</button></div>`);
+  prevApp();
+}
+function prevApp(){
+  document.querySelectorAll('#ea-emo button').forEach(b=>b.classList.toggle('on',b.textContent===EA.icon));
+  document.querySelectorAll('#ea-col button').forEach(b=>b.classList.toggle('on',b.dataset.c===EA.color));
+  $('#ea-prev').innerHTML=icon(EA)+`<div><b>${esc(EA.name||'앱 이름')}</b><div class="hint" style="margin:0">${esc(EA.desc||'설명')}</div></div>`;
+}
+async function saveApp(){
+  const a=Object.assign({},EA,{name:$('#ea-name').value,url:$('#ea-url').value.trim(),cat:$('#ea-cat').value,status:$('#ea-status').value,desc:$('#ea-desc').value,scope:$('#ea-scope').value});
+  try{S.data=await api('apiSaveApp',a);closeM();toast('저장했습니다');render()}catch(e){fail(e)}
+}
+async function delApp(id){
+  if(!confirm('이 앱을 도구함에서 지울까요? (앱 자체는 그대로 남습니다)'))return;
+  try{S.data=await api('apiDelApp',id);closeM();toast('지웠습니다');render()}catch(e){fail(e)}
+}
+
+/* ---------- 양식 자료실 ---------- */
+function vFiles(){
+  const D=S.data,cats=['전체',...new Set(D.files.map(f=>f.cat||'기타'))];
+  if(!cats.includes(S.fcat))S.fcat='전체';
+  $('#app').innerHTML=`<div class="hero"><div><h2>양식 자료실</h2><p class="lead" style="margin:0">계획서·결과보고서·공문 서식을 받아 씁니다.</p></div>
+  <div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input placeholder="자료 찾기" value="${esc(S.fq)}" oninput="S.fq=this.value;drawFiles()"></div>
+  ${isEd()?`<button class="btn pri" onclick="editFile()">＋ 자료 올리기</button>`:''}</div>
+  <div class="chips">${cats.map(c=>`<button class="chip ${c===S.fcat?'on':''}" data-c="${esc(c)}" onclick="S.fcat=this.dataset.c;vFiles()">${esc(c)}</button>`).join('')}</div>
+  <div class="box"><ul class="list" id="flist"></ul></div>`;
+  drawFiles();
+}
+function drawFiles(){
+  const q=S.fq.trim().toLowerCase();
+  const fs=S.data.files.filter(f=>(S.fcat==='전체'||(f.cat||'기타')===S.fcat)&&(!q||(f.title+' '+f.desc+' '+f.fname).toLowerCase().includes(q)));
+  $('#flist').innerHTML=fs.map(f=>{const [x,c]=fext(f);return `<li><div class="ficon" style="background:${c}">${x}</div>
+  <div class="main"><div class="tt">${esc(f.title)}</div><div class="meta"><span class="tag">${esc(f.cat)}</span> ${esc(f.desc)} <span class="hide-m">· ${esc(f.by)} · ${day(f.at)}${f.size?' · '+size(f.size):''}${f.kind==='파일'?' · 받음 '+f.hits:''}</span></div></div>
+  <button class="btn sm pri" onclick="getFile('${f.id}')">${f.kind==='링크'?'열기':'받기'}</button>${isEd()?`<button class="btn sm" onclick="editFile('${f.id}')">고치기</button>`:''}</li>`}).join('')||'<div class="empty">자료가 없습니다</div>';
+}
+async function getFile(id){
+  const f=S.data.files.find(x=>x.id===id);if(!f)return;
+  if(f.kind==='링크'){window.open(f.url,'_blank','noopener');return}
+  try{
+    toast('내려받는 중…');
+    const r=await api('apiDownload',id);
+    const bin=atob(r.b64),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+    const url=URL.createObjectURL(new Blob([u8],{type:r.mime||'application/octet-stream'}));
+    const a=document.createElement('a');a.href=url;a.download=r.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);
+    f.hits++;
+  }catch(e){fail(e)}
+}
+function editFile(id){
+  const f=id?S.data.files.find(x=>x.id===id):{cat:'',title:'',desc:'',kind:'파일',url:'',fname:''};
+  const cats=[...new Set(['계획서','결과보고','공문','설문','강사','기타',...S.data.files.map(x=>x.cat)].filter(Boolean))];
+  modal(`<h3>${id?'자료 고치기':'자료 올리기'}</h3>
+  <label class="f">제목</label><input class="in" id="ef-title" maxlength="80" value="${esc(f.title)}" placeholder="연수 결과보고서 서식(2026)">
+  <div class="g2"><div><label class="f">분류</label><input class="in" id="ef-cat" list="ef-cats" maxlength="20" value="${esc(f.cat)}" placeholder="결과보고"><datalist id="ef-cats">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist></div>
+  <div><label class="f">종류</label><select class="in" id="ef-kind" onchange="fkind()"><option ${f.kind==='파일'?'selected':''}>파일</option><option ${f.kind==='링크'?'selected':''}>링크</option></select></div></div>
+  <label class="f">설명</label><input class="in" id="ef-desc" maxlength="300" value="${esc(f.desc)}">
+  <div id="ef-file"><label class="f">파일 ${id&&f.kind==='파일'?'(바꿀 때만 고르세요)':''}</label><input type="file" class="in" id="ef-input"><p class="hint">${id&&f.fname?'지금 파일: '+esc(f.fname)+' · ':''}20MB까지</p></div>
+  <div id="ef-link"><label class="f">주소 (https://)</label><input class="in" id="ef-url" value="${esc(f.url)}" placeholder="구글 드라이브·문서 링크"></div>
+  <div class="foot">${id?`<button class="btn bad" onclick="delFile('${id}')">삭제</button>`:''}<span class="sp"></span><button class="btn" onclick="closeM()">취소</button><button class="btn pri" id="ef-save" onclick="saveFile('${id||''}')">저장</button></div>`);
+  fkind();
+}
+function fkind(){const k=$('#ef-kind').value;$('#ef-file').classList.toggle('hidden',k!=='파일');$('#ef-link').classList.toggle('hidden',k!=='링크')}
+async function saveFile(id){
+  const meta={id:id||'',title:$('#ef-title').value,cat:$('#ef-cat').value,desc:$('#ef-desc').value};
+  let b64='';
+  if($('#ef-kind').value==='파일'){
+    const file=$('#ef-input').files[0];
+    if(file){
+      if(file.size>20*1024*1024)return toast('파일은 20MB까지 올릴 수 있습니다.',true);
+      b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(file)});
+      meta.fname=file.name;meta.mime=file.type;
+    }else if(!id||S.data.files.find(x=>x.id===id).kind!=='파일')return toast('파일을 골라 주세요.',true);
+  }else{meta.url=$('#ef-url').value.trim();if(!meta.url)return toast('주소를 적어 주세요.',true)}
+  $('#ef-save').disabled=true;
+  try{S.data=await api('apiSaveFile',meta,b64);closeM();toast('저장했습니다');render()}catch(e){fail(e);$('#ef-save').disabled=false}
+}
+async function delFile(id){
+  if(!confirm('이 자료를 지울까요?'))return;
+  try{S.data=await api('apiDelFile',id);closeM();toast('지웠습니다');render()}catch(e){fail(e)}
+}
+
+/* ---------- 게시판 ---------- */
+function vBoard(){
+  const cats=['전체',...S.data.postCats];
+  $('#app').innerHTML=`<div class="hero"><div><h2>게시판</h2><p class="lead" style="margin:0">공지와 업무 이야기를 나눕니다.</p></div>
+  <div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input placeholder="글 찾기" value="${esc(S.bq)}" oninput="S.bq=this.value;drawPosts()"></div>
+  <button class="btn pri" onclick="editPost()">✎ 글쓰기</button></div>
+  <div class="chips">${cats.map(c=>`<button class="chip ${c===S.bcat?'on':''}" onclick="S.bcat='${c}';vBoard()">${c}</button>`).join('')}</div>
+  <div class="box"><ul class="list" id="plist"></ul></div>`;
+  drawPosts();
+}
+function drawPosts(){
+  const q=S.bq.trim().toLowerCase();
+  const ps=S.data.posts.filter(p=>(S.bcat==='전체'||p.cat===S.bcat)&&(!q||(p.title+' '+p.body+' '+p.by).toLowerCase().includes(q)));
+  $('#plist').innerHTML=ps.map(p=>`<li class="click" onclick="openPost('${p.id}')"><span class="tag ${esc(p.cat)}">${esc(p.cat)}</span>
+  <div class="main"><div class="tt">${p.pin?'<span class="pin">고정 </span>':''}${esc(p.title)}${p.cmts?` <span style="color:var(--pri);font-size:13px">[${p.cmts}]</span>`:''}</div><div class="meta">${esc(p.by)} · ${day(p.at)} · 조회 ${p.views}</div></div></li>`).join('')||'<div class="empty">글이 없습니다</div>';
+}
+let CUR=null;
+async function openPost(id){
+  try{CUR=await api('apiPost',id);showPost();const p=S.data.posts.find(x=>x.id===id);if(p)p.views=CUR.views}catch(e){fail(e)}
+}
+function showPost(){
+  const p=CUR,mine=p.email===S.me.email||isAdm();
+  modal(`<div class="post-h"><span class="tag ${esc(p.cat)}">${esc(p.cat)}</span>${p.pin?' <span class="pin" style="color:var(--bad);font-size:12px;font-weight:800">고정</span>':''}<h3>${esc(p.title)}</h3>
+  <div class="hint" style="margin:0">${esc(p.by)} · ${esc(p.at)}${p.edited?' (고침 '+esc(p.edited)+')':''} · 조회 ${p.views}</div></div>
+  <div class="post-b">${esc(p.body)}</div>
+  <div class="cmts"><b style="font-size:14px">댓글 ${p.comments.length}</b>
+  ${p.comments.map(c=>`<div class="cmt"><span class="who2">${esc(c.by)}</span><span class="when">${esc(c.at)}</span>${c.email===S.me.email||isAdm()?` <a style="font-size:12px;color:var(--mute);cursor:pointer;margin-left:6px" onclick="delCmt('${c.id}')">지우기</a>`:''}<p>${esc(c.body)}</p></div>`).join('')}
+  <div class="row" style="margin-top:12px;flex-wrap:nowrap"><input class="in" id="cm-body" maxlength="2000" placeholder="댓글을 적어 주세요" onkeydown="if(event.key==='Enter'&&!event.isComposing)addCmt()"><button class="btn" onclick="addCmt()">등록</button></div></div>
+  <div class="foot">${mine?`<button class="btn bad" onclick="delPost('${p.id}')">삭제</button><button class="btn" onclick="editPost('${p.id}')">고치기</button>`:''}<span class="sp"></span><button class="btn" onclick="closeM();if(S.tab==='board')drawPosts()">닫기</button></div>`,true);
+}
+async function addCmt(){
+  const v=$('#cm-body').value.trim();if(!v)return;
+  try{CUR=await api('apiAddCmt',CUR.id,v);const p=S.data.posts.find(x=>x.id===CUR.id);if(p)p.cmts=CUR.comments.length;showPost()}catch(e){fail(e)}
+}
+async function delCmt(id){
+  if(!confirm('댓글을 지울까요?'))return;
+  try{CUR=await api('apiDelCmt',id);const p=S.data.posts.find(x=>x.id===CUR.id);if(p)p.cmts=CUR.comments.length;showPost()}catch(e){fail(e)}
+}
+function editPost(id){
+  const p=id?(CUR&&CUR.id===id?CUR:S.data.posts.find(x=>x.id===id)):{cat:'업무',title:'',body:'',pin:false};
+  const cats=S.data.postCats.filter(c=>c!=='공지'||isEd());
+  modal(`<h3>${id?'글 고치기':'글쓰기'}</h3>
+  <div class="g2"><div><label class="f">분류</label><select class="in" id="ep-cat">${cats.map(c=>`<option ${c===p.cat?'selected':''}>${c}</option>`).join('')}</select></div>
+  ${isEd()?`<div><label class="f">맨 위 고정</label><label style="display:flex;gap:8px;align-items:center;height:40px"><input type="checkbox" id="ep-pin" ${p.pin?'checked':''}> 목록 맨 위에 고정</label></div>`:''}</div>
+  <label class="f">제목</label><input class="in" id="ep-title" maxlength="100" value="${esc(p.title)}">
+  <label class="f">내용</label><textarea class="in" id="ep-body" maxlength="20000">${esc(p.body)}</textarea>
+  <div class="foot"><span class="sp"></span><button class="btn" onclick="closeM()">취소</button><button class="btn pri" onclick="savePost('${id||''}')">저장</button></div>`,true);
+}
+async function savePost(id){
+  const pin=$('#ep-pin');
+  try{
+    const r=await api('apiSavePost',{id,cat:$('#ep-cat').value,title:$('#ep-title').value,body:$('#ep-body').value,pin:pin?pin.checked:false});
+    S.data=r.all;closeM();if(S.tab!=='board')S.tab='board';render();openPost(r.id);
+  }catch(e){fail(e)}
+}
+async function delPost(id){
+  if(!confirm('이 글을 지울까요? 댓글도 함께 지워집니다.'))return;
+  try{S.data=await api('apiDelPost',id);closeM();toast('지웠습니다');render()}catch(e){fail(e)}
+}
+
+/* ---------- 관리 ---------- */
+function vAdmin(){
+  const tabs=[['apps','앱 관리']];
+  if(isAdm())tabs.push(['users','사용자·권한'+(S.data.pending?` (${S.data.pending})`:'')],['log','활동 기록']);
+  if(!tabs.find(t=>t[0]===S.admTab))S.admTab='apps';
+  $('#app').innerHTML=`<div class="hero"><div><h2>관리</h2><p class="lead" style="margin:0">${isAdm()?'총괄 관리자 화면입니다.':'앱 등재·순서를 관리합니다.'}</p></div>
+  <span class="sp"></span>${isAdm()?`<a class="btn" href="${esc(S.data.sheetUrl)}" target="_blank">데이터 시트</a><a class="btn" href="${esc(S.data.folderUrl)}" target="_blank">자료 폴더</a>`:''}</div>
+  <div class="subtabs">${tabs.map(t=>`<button class="${t[0]===S.admTab?'on':''}" onclick="S.admTab='${t[0]}';vAdmin()">${t[1]}</button>`).join('')}</div><div id="adm"></div>`;
+  ({apps:aApps,users:aUsers,log:aLog})[S.admTab]();
+}
+function aApps(){
+  const apps=S.data.apps;
+  $('#adm').innerHTML=`<div class="row" style="margin-bottom:12px"><span class="hint" style="margin:0">≡ 손잡이를 끌어 순서를 바꾸면 도구함에 그대로 반영됩니다.</span><span class="sp"></span><button class="btn pri" onclick="editApp()">＋ 앱 등재</button></div>
+  <div class="box tbl-wrap"><table class="t"><thead><tr><th></th><th></th><th>이름</th><th class="hide-m">분류</th><th>상태</th><th class="hide-m">보이는 사람</th><th class="hide-m">주소</th><th></th></tr></thead><tbody id="atb">
+  ${apps.map(a=>`<tr draggable="true" data-id="${a.id}"><td class="hd">≡</td><td>${icon(a,'ic-s')}</td><td><b>${esc(a.name)}</b><div class="hint" style="margin:0">${esc(a.desc)}</div></td><td class="hide-m">${esc(a.cat)}</td><td>${esc(a.status)}</td><td class="hide-m">${esc(a.scope)}</td>
+  <td class="hide-m" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.url?`<a href="${esc(a.url)}" target="_blank">${esc(a.url.replace(/^https:\/\//,''))}</a>`:'<span class="hint">없음</span>'}</td>
+  <td><button class="btn sm" onclick="editApp('${a.id}')">고치기</button></td></tr>`).join('')}</tbody></table>${apps.length?'':'<div class="empty">등재된 앱이 없습니다</div>'}</div>`;
+  dragRows();
+}
+function dragRows(){
+  const tb=$('#atb');let src=null;
+  tb.querySelectorAll('tr').forEach(tr=>{
+    tr.addEventListener('dragstart',e=>{src=tr;tr.classList.add('drag');e.dataTransfer.effectAllowed='move'});
+    tr.addEventListener('dragend',async()=>{tr.classList.remove('drag');const ids=[...tb.querySelectorAll('tr')].map(r=>r.dataset.id);const old=S.data.apps.map(a=>a.id);if(ids.join()===old.join())return;try{S.data=await api('apiOrderApps',ids);toast('순서를 바꿨습니다')}catch(e){fail(e);aApps()}});
+    tr.addEventListener('dragover',e=>{e.preventDefault();if(!src||src===tr)return;const r=tr.getBoundingClientRect();tb.insertBefore(src,(e.clientY-r.top)>r.height/2?tr.nextSibling:tr)});
+  });
+}
+async function aUsers(){
+  $('#adm').innerHTML='<div class="spin" style="margin:40px auto"></div>';
+  try{drawUsers(await api('apiUsers'))}catch(e){fail(e)}
+}
+function drawUsers(us){
+  us.sort((a,b)=>(a.status==='대기'?0:1)-(b.status==='대기'?0:1)||b.req.localeCompare(a.req));
+  S.data.pending=us.filter(u=>u.status==='대기').length;
+  $('#adm').innerHTML=`<p class="hint" style="margin:0 0 12px">관리자 = 사용자 승인·권한까지 전부 · 편집 = 앱 등재·자료 올리기·공지 · 열람 = 보기와 게시판 글·댓글</p>
+  <div class="box tbl-wrap"><table class="t"><thead><tr><th>이름</th><th>계정</th><th class="hide-m">소속·메모</th><th>권한</th><th>상태</th><th class="hide-m">요청</th><th></th></tr></thead><tbody>
+  ${us.map(u=>u.owner?`<tr><td><b>${esc(u.name)}</b></td><td>${esc(u.email)}</td><td class="hide-m">${esc(u.memo)}</td><td>총괄 관리자</td><td><span class="st 승인">승인</span></td><td class="hide-m"></td><td></td></tr>`:
+  `<tr data-e="${esc(u.email)}"><td><b>${esc(u.name)}</b></td><td style="word-break:break-all">${esc(u.email)}</td><td class="hide-m">${esc(u.memo)}</td>
+  <td><select class="in" style="padding:5px 8px;width:auto" data-k="role">${['관리자','편집','열람'].map(r=>`<option ${r===u.role?'selected':''}>${r}</option>`).join('')}</select></td>
+  <td><select class="in" style="padding:5px 8px;width:auto" data-k="status">${['대기','승인','거절'].map(r=>`<option ${r===u.status?'selected':''}>${r}</option>`).join('')}</select></td>
+  <td class="hide-m hint" style="white-space:nowrap">${esc(u.req)}</td>
+  <td style="white-space:nowrap">${u.status==='대기'?`<button class="btn sm pri" onclick="setU(this,'승인')">승인</button> `:''}<button class="btn sm" onclick="setU(this)">저장</button> <button class="btn sm bad" onclick="delU(this)">삭제</button></td></tr>`).join('')}
+  </tbody></table></div>`;
+  $('#tab-admin').innerHTML='관리'+(S.data.pending?`<span class="dot">${S.data.pending}</span>`:'');
+  document.querySelector('.subtabs button.on').textContent='사용자·권한'+(S.data.pending?` (${S.data.pending})`:'');
+}
+async function setU(b,st){
+  const tr=b.closest('tr'),e=tr.dataset.e,role=tr.querySelector('[data-k=role]').value,status=st||tr.querySelector('[data-k=status]').value;
+  try{drawUsers(await api('apiSetUser',e,role,status));toast('저장했습니다')}catch(x){fail(x)}
+}
+async function delU(b){
+  const e=b.closest('tr').dataset.e;if(!confirm(e+' 계정을 목록에서 지울까요?'))return;
+  try{drawUsers(await api('apiDelUser',e));toast('지웠습니다')}catch(x){fail(x)}
+}
+async function aLog(){
+  $('#adm').innerHTML='<div class="spin" style="margin:40px auto"></div>';
+  try{const L=await api('apiLog');$('#adm').innerHTML=`<div class="box tbl-wrap"><table class="t"><thead><tr><th>시각</th><th>누가</th><th>무엇</th><th>내용</th></tr></thead><tbody>${L.map(l=>`<tr><td class="hint" style="white-space:nowrap">${esc(l.at)}</td><td>${esc(l.who)}</td><td>${esc(l.what)}</td><td>${esc(l.text)}</td></tr>`).join('')}</tbody></table>${L.length?'':'<div class="empty">기록이 없습니다</div>'}</div>`}catch(e){fail(e)}
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
+boot();
+</script>
+</body>
+</html>
