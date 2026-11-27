@@ -555,7 +555,7 @@ async function aUsers(){
 function drawUsers(us){
   us.sort((a,b)=>(a.status==='대기'?0:1)-(b.status==='대기'?0:1)||b.req.localeCompare(a.req));
   S.data.pending=us.filter(u=>u.status==='대기').length;
-  $('#adm').innerHTML=`<p class="hint" style="margin:0 0 12px">신청자는 [승인]을 누르면 ${rl('편집')}가 됩니다(승인 전에 권한 칸에서 바꿀 수 있음). 등급은 권한 칸을 바꾸고 [저장]. · ${rl('관리자')} = 사용자 승인·권한까지 전부 · ${rl('편집')} = 담당자: 도구 사용·앱 등재·자료·공지 · ${rl('열람')} = 연수생: 게시판만(도구 막힘) · ${rl('대기')} = 승인 대기</p>
+  $('#adm').innerHTML=`<p class="hint" style="margin:0 0 12px">신청자는 [승인]을 누르면 ${rl('편집')}가 됩니다(승인 전에 권한 칸에서 바꿀 수 있음). 등급은 권한 칸을 바꾸고 [저장]. · ${rl('관리자')} = 사용자 승인·권한까지 전부 · ${rl('편집')} = 담당자: 도구 사용·앱 등재·자료·공지 · ${rl('열람')} = 연수생: 게시판·양식 보기만(도구 막힘) · ${rl('대기')} = 승인 대기</p>
   <div class="box tbl-wrap"><table class="t"><thead><tr><th>이름</th><th>계정</th><th class="hide-m">소속·메모</th><th>권한</th><th>상태</th><th class="hide-m">요청</th><th></th></tr></thead><tbody>
   ${us.map(u=>u.owner?`<tr><td><b>${esc(u.name)}</b></td><td>${esc(u.email)}</td><td class="hide-m">${esc(u.memo)}</td><td>${OWNER}</td><td><span class="st 승인">승인</span></td><td class="hide-m"></td><td></td></tr>`:
   `<tr data-e="${esc(u.email)}"><td><b>${esc(u.name)}</b></td><td style="word-break:break-all">${esc(u.email)}</td><td class="hide-m">${esc(u.memo)}</td>
